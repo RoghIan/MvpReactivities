@@ -2,30 +2,41 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
+using Application.Customers;
 
 namespace API.Controllers
 {
     public class CustomerController : BaseApiController
     {
-        private readonly DataContext _context;
-
-        public CustomerController(DataContext context)
+        [HttpGet]
+        public async Task<ActionResult<List<Customer>>> GetCustomers()
         {
-            _context = context;
+            return await Mediator.Send(new List.Query());
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<Customer>>> GetCustomers() 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            return await _context.Customers.ToListAsync();
+            return await Mediator.Send(new Details.Query{Id = id});
         }
 
-        [HttpGet]
-        public async Task<ActionResult<Customer>> GetCustomer(int id) 
+        [HttpPost]
+        public async Task<IActionResult> CreateCustomer(Customer customer)
         {
-            return await _context.Customers.FindAsync(id);
+            return Ok(await Mediator.Send(new Create.Command {Customer = customer}));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> EditCustomer(int id, Customer customer)
+        {
+            customer.Id = id;
+            return Ok(await Mediator.Send(new Edit.Command{ Customer = customer}));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            return Ok(await Mediator.Send(new Delete.Command{ Id = id}));
         }
     }
 }
