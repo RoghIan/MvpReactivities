@@ -2,7 +2,7 @@ import { Container } from "semantic-ui-react";
 import NavBar from "./NavBar";
 import CustomerTable from "../../features/customers/table/CustomerTable";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import agent from "../api/agent";
 
 function App() {
   const [customers, setCustomers] = useState([]);
@@ -10,8 +10,8 @@ function App() {
   const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/customer").then((response) => {
-      setCustomers(response.data);
+    agent.Customers.list().then((response) => {
+      setCustomers(response);
     });
   }, []);
 
@@ -25,16 +25,25 @@ function App() {
   }
 
   function handleCreateOrEditCustomer(customer) {
-    customer.id
-      ? setCustomers([
+    if (customer.id) {
+      agent.Customers.update(customer).then(() => {
+        setCustomers([
           ...customers.filter((x) => x.id !== customer.id),
           customer,
-        ])
-      : setCustomers([...customers, { ...customer, id: customers.length + 1 }]);
+        ]);
+      });
+    } else {
+      customer.id = 0;
+      agent.Customers.create(customer).then(() => {
+        setCustomers([...customers, { ...customer, customer }]);
+      });
+    }
   }
 
   function handleDeleteCustomer(id) {
-    setCustomers([...customers.filter((x) => x.id !== id)]);
+    agent.Customers.del(id).then(() => {
+      setCustomers([...customers.filter((x) => x.id !== id)]);
+    });
   }
 
   return (
