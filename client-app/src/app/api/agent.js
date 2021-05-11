@@ -18,8 +18,32 @@ const Customers = {
   del: (id) => requests.del(`/customer/${id}`),
 };
 
+const Products = {
+  list: () => requests.get("/product"),
+  create: (product) => requests.post("/product", product),
+  update: (product) => requests.put(`/product/${product.id}`, product),
+  del: (id) => requests.del(`/product/${id}`),
+};
+
+const Stores = {
+  list: () => requests.get("/store"),
+  create: (store) => requests.post("/store", store),
+  update: (store) => requests.put(`/store/${store.id}`, store),
+  del: (id) => requests.del(`/store/${id}`),
+};
+
+const Sales = {
+  list: () => requests.get("/sales"),
+  create: (sales) => requests.post("/sales", sales),
+  update: (sales) => requests.put(`/sales/${sales.id}`, sales),
+  del: (id) => requests.del(`/sales/${id}`),
+};
+
 const agent = {
   Customers,
+  Products,
+  Stores,
+  Sales,
 };
 
 export default agent;

@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { Button, Container, Menu } from "semantic-ui-react";
 
 export default function NavBar() {
@@ -9,10 +10,10 @@ export default function NavBar() {
           <img src="/logo192.png" alt="logo" style={{ marginRight: 10 }} />
           Mvp Reactivities
         </Menu.Item>
-        <Menu.Item name="Customers" />
-        <Menu.Item>
-          <Button positive content="Create Customer" />
-        </Menu.Item>
+        <Menu.Item as={NavLink} to="/customers" name="Customers" />
+        <Menu.Item as={NavLink} to="/products" name="Products" />
+        <Menu.Item as={NavLink} to="/stores" name="Stores" />
+        <Menu.Item as={NavLink} to="/sales" name="Sales" />
       </Container>
     </Menu>
   );

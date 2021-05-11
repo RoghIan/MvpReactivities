@@ -1,13 +1,58 @@
 import { Table, Button, Icon } from "semantic-ui-react";
 import CustomerModalForm from "../modal-form/CustomerModalForm";
-import React, { useState } from "react";
+import DeleteConfirmationModal from "../modal-form/DeleteConfirmationModal";
+import React, { useEffect, useState } from "react";
+import agent from "../../../app/api/agent";
 
-export default function CustomerTable(props) {
+export default function CustomerTable() {
   const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDeleteConfirmationModal, setOpenDeleteConfirmationModal] =
+    useState(false);
+
+  function deleteSelectedCustomer(customer) {
+    handleSelectCustomer(customer ? customer.id : 0);
+    setOpenDeleteConfirmationModal(true);
+  }
 
   function editSelectedCustomer(customer) {
-    props.selectCustomer(customer ? customer.id : 0);
+    handleSelectCustomer(customer ? customer.id : 0);
     setOpenEditModal(true);
+  }
+
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(undefined);
+
+  useEffect(() => {
+    agent.Customers.list().then((response) => {
+      setCustomers(response);
+    });
+  }, []);
+
+  function handleSelectCustomer(id) {
+    setSelectedCustomer(customers.find((x) => x.id === id));
+  }
+
+  function handleCreateOrEditCustomer(customer) {
+    if (customer.id) {
+      agent.Customers.update(customer).then(() => {
+        setCustomers([
+          ...customers.filter((x) => x.id !== customer.id),
+          customer,
+        ]);
+      });
+    } else {
+      customer.id = 0;
+      agent.Customers.create(customer).then(() => {
+        setCustomers([...customers, { ...customer, customer }]);
+      });
+    }
+  }
+
+  function handleDeleteCustomer(id) {
+    agent.Customers.del(id).then(() => {
+      setOpenDeleteConfirmationModal(false);
+      setCustomers([...customers.filter((x) => x.id !== id)]);
+    });
   }
 
   return (
@@ -22,10 +67,17 @@ export default function CustomerTable(props) {
         <CustomerModalForm
           setOpenEditModal={setOpenEditModal}
           openEditModal={openEditModal}
-          selectedCustomer={props.selectedCustomer}
-          selectCustomer={props.selectCustomer}
-          cancelSelectCustomer={props.cancelSelectCustomer}
-          createOrEdit={props.createOrEdit}
+          selectedCustomer={selectedCustomer}
+          createOrEdit={handleCreateOrEditCustomer}
+        />
+      )}
+
+      {openDeleteConfirmationModal && (
+        <DeleteConfirmationModal
+          setOpenDeleteConfirmationModal={setOpenDeleteConfirmationModal}
+          openDeleteConfirmationModal={openDeleteConfirmationModal}
+          selectedCustomer={selectedCustomer}
+          deleteSales={handleDeleteCustomer}
         />
       )}
 
@@ -39,7 +91,7 @@ export default function CustomerTable(props) {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {props.customers.map((customer) => (
+          {customers.map((customer) => (
             <Table.Row key={customer.id}>
               <Table.Cell>{customer.name}</Table.Cell>
               <Table.Cell>{customer.address}</Table.Cell>
@@ -55,7 +107,7 @@ export default function CustomerTable(props) {
               <Table.Cell>
                 <Button
                   color="red"
-                  onClick={() => props.deleteCustomer(customer.id)}
+                  onClick={() => deleteSelectedCustomer(customer)}
                 >
                   <Icon name="trash" />
                   Delete
