@@ -52,5 +52,5 @@ jobs:
       with:
         app-name: 'mvp-reactivities'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_980a4dafab524a3bada1bce6512d4c9b }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_6199686f4efd4ee2afb0ab043fc68209 }}
         package: .
